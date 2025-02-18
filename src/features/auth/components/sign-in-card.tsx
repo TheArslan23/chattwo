@@ -42,46 +42,13 @@ export const SignInCard = ({ setState }: SignInCardProps) => {
       });
   };
 
-const onProviderSignIn = (value: "github" | "google") => {
-  setPending(true);
-
-  if (value === "google") {
-    if (typeof chrome !== "undefined" && chrome.identity) {
-      // Running in a Chrome extension -> Use `chrome.identity.launchWebAuthFlow`
-      chrome.identity.launchWebAuthFlow(
-        {
-          url: `https://accounts.google.com/o/oauth2/auth?client_id=617204804018-c859mv2caj0ia9l6pdeasptc8uk83edt.apps.googleusercontent.com&redirect_uri=https://YOUR_EXTENSION_ID.chromiumapp.org/&response_type=token&scope=email`,
-          interactive: true
-        },
-        function (redirectUrl) {
-          if (chrome.runtime.lastError) {
-            console.error(chrome.runtime.lastError);
-            setPending(false);
-            return;
-          }
-
-          // Extract token from URL
-          const url = new URL(redirectUrl);
-          const token = url.hash.split("&")[0].split("=")[1];
-
-          // Send token to your Next.js backend
-          signIn("google", { token }).finally(() => {
-            setPending(false);
-          });
-        }
-      );
-    } else {
-      // Running in the web app -> Use regular OAuth flow
-      signIn("google").finally(() => {
+  const onProviderSignIn = (value: "github" | "google") => {
+    setPending(true);
+    signIn(value)
+      .finally(() => {
         setPending(false);
-      });
-    }
-  } else {
-    signIn(value).finally(() => {
-      setPending(false);
-    });
-  }
-};
+      })
+  };
 
   return (
     <Card className="w-full h-full p-8">
