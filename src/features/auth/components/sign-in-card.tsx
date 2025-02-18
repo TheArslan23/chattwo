@@ -44,12 +44,30 @@ export const SignInCard = ({ setState }: SignInCardProps) => {
 
   const onProviderSignIn = (value: "github" | "google") => {
     setPending(true);
-    signIn(value)
+
+  if (value === "google") {
+    // Open the Google OAuth login URL in a new tab
+    const googleAuthUrl = "https://accounts.google.com/o/oauth2/v2/auth?client_id=YOUR_GOOGLE_CLIENT_ID&redirect_uri=YOUR_CALLBACK_URL&response_type=token&scope=email";
+    const popup = window.open(googleAuthUrl, "GoogleOAuth", "width=600,height=600");
+
+    // Poll for the popup's status to handle authentication
+    const checkPopup = setInterval(() => {
+      if (popup.closed) {
+        clearInterval(checkPopup);
+        // You can use the token passed back from the callback
+        // Handle token and authenticate the user
+      }
+    }, 1000);
+  }
+
+  // Optionally handle other providers (like GitHub)
+  if (value === "github") {
+    signIn("github")
       .finally(() => {
         setPending(false);
-      })
-  };
-
+      });
+  }
+};
   return (
     <Card className="w-full h-full p-8">
       <CardHeader className="px-0 pt-0">
