@@ -42,32 +42,47 @@ export const SignInCard = ({ setState }: SignInCardProps) => {
       });
   };
 
-  const onProviderSignIn = (value: "github" | "google") => {
-    setPending(true);
+const onProviderSignIn = (value: "github" | "google") => {
+  setPending(true);
 
   if (value === "google") {
-    // Open the Google OAuth login URL in a new tab
-    const googleAuthUrl = "https://accounts.google.com/o/oauth2/v2/auth?client_id=YOUR_GOOGLE_CLIENT_ID&redirect_uri=YOUR_CALLBACK_URL&response_type=token&scope=email";
-    const popup = window.open(googleAuthUrl, "GoogleOAuth", "width=600,height=600");
+    if (typeof chrome !== "undefined" && chrome.identity) {
+      // Running in a Chrome extension -> Use `chrome.identity.launchWebAuthFlow`
+      chrome.identity.launchWebAuthFlow(
+        {
+          url: `https://accounts.google.com/o/oauth2/auth?client_id=617204804018-c859mv2caj0ia9l6pdeasptc8uk83edt.apps.googleusercontent.com&redirect_uri=https://giant-mammoth-594.convex.site/api/auth/callback/google.chromiumapp.org/&response_type=token&scope=email`,
+          interactive: true
+        },
+        function (redirectUrl) {
+          if (chrome.runtime.lastError) {
+            console.error(chrome.runtime.lastError);
+            setPending(false);
+            return;
+          }
 
-    // Poll for the popup's status to handle authentication
-    const checkPopup = setInterval(() => {
-      if (popup.closed) {
-        clearInterval(checkPopup);
-        // You can use the token passed back from the callback
-        // Handle token and authenticate the user
-      }
-    }, 1000);
-  }
+          // Extract token from URL
+          const url = new URL(redirectUrl);
+          const token = url.hash.split("&")[0].split("=")[1];
 
-  // Optionally handle other providers (like GitHub)
-  if (value === "github") {
-    signIn("github")
-      .finally(() => {
+          // Send token to your Next.js backend
+          signIn("google", { token }).finally(() => {
+            setPending(false);
+          });
+        }
+      );
+    } else {
+      // Running in the web app -> Use regular OAuth flow
+      signIn("google").finally(() => {
         setPending(false);
       });
+    }
+  } else {
+    signIn(value).finally(() => {
+      setPending(false);
+    });
   }
 };
+
   return (
     <Card className="w-full h-full p-8">
       <CardHeader className="px-0 pt-0">
