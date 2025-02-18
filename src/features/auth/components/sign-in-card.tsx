@@ -50,7 +50,7 @@ const onProviderSignIn = (value: "github" | "google") => {
       // Running in a Chrome extension -> Use `chrome.identity.launchWebAuthFlow`
       chrome.identity.launchWebAuthFlow(
         {
-          url: `https://accounts.google.com/o/oauth2/auth?client_id=617204804018-c859mv2caj0ia9l6pdeasptc8uk83edt.apps.googleusercontent.com&redirect_uri=https://giant-mammoth-594.convex.site/api/auth/callback/google.chromiumapp.org/&response_type=token&scope=email`,
+          url: `https://accounts.google.com/o/oauth2/auth?client_id=617204804018-c859mv2caj0ia9l6pdeasptc8uk83edt.apps.googleusercontent.com&redirect_uri=https://YOUR_EXTENSION_ID.chromiumapp.org/&response_type=token&scope=email`,
           interactive: true
         },
         function (redirectUrl) {
